@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hongxincn/promexp/node2es/add"
-	"github.com/hongxincn/promexp/node2es/config"
-	"github.com/hongxincn/promexp/node2es/es"
+	"github.com/ailkyud/go-prometheus2kafka/add"
+	"github.com/ailkyud/go-prometheus2kafka/config"
+	"github.com/ailkyud/go-prometheus2kafka/es"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"

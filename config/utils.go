@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/hongxincn/promexp/node2es/common"
+	"github.com/ailkyud/go-prometheus2kafka/common"
 )
 
 func GetDecryptedPassword(encryptedPassword string) (string, error) {

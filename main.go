@@ -6,11 +6,10 @@ import (
 	"os"
 	"time"
 
-	"./add"
-	"./config"
-	"./es"
-	"./prometheus"
-
+	"github.com/ailkyud/go-prometheus2kafka/add"
+	"github.com/ailkyud/go-prometheus2kafka/config"
+	"github.com/ailkyud/go-prometheus2kafka/es"
+	"github.com/ailkyud/go-prometheus2kafka/prometheus"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 

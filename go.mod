@@ -1,6 +1,6 @@
-module main
+module github.com/ailkyud/go-prometheus2kafka
 
 require (
-	github.com/hongxincn/promexp/node2es v0.0.0-20181211070632-6aeb7969b499
-	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+	gopkg.in/olivere/elastic.v5 v5.0.78
+	gopkg.in/yaml.v2 v2.2.2
 )

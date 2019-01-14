@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hongxincn/promexp/node2es/config"
+	"github.com/ailkyud/go-prometheus2kafka/config"
 )
 
 var AddFieldsFromExternalApi *AddFields
