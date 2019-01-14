@@ -21,7 +21,7 @@ var (
 
 func main() {
 	var (
-		configFile       = kingpin.Flag("config.file", "Configuration file").Default("node2es_config.yml").String()
+		configFile       = kingpin.Flag("config.file", "Configuration file").Default("prometheus2kafka.yml").String()
 		keyToBeEncrypted = kingpin.Flag("encrypting.key", "encrypting inputted key, and exist immediately").String()
 	)
 	kingpin.HelpFlag.Short('h')
