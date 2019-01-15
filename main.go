@@ -8,7 +8,6 @@ import (
 
 	"github.com/ailkyud/go-prometheus2kafka/add"
 	"github.com/ailkyud/go-prometheus2kafka/config"
-	"github.com/ailkyud/go-prometheus2kafka/es"
 	"github.com/ailkyud/go-prometheus2kafka/prometheus"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -34,11 +33,6 @@ func main() {
 	}
 
 	err := config.LoadConfig(*configFile)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	err = es.NewEsClient()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

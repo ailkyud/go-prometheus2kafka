@@ -1,58 +1,22 @@
-listen_on: ':9311'
+listen_on: ':19311'
 prometheus:
-  url: 'http://10.1.236.157:9090'
+  url: 'http://132.252.128.109:19090'
 es:
   urls: ['http://10.1.236.157:9200/']
   index: 'node-metrics-${+yyyy.MM}'
+kafka:
+  brokers: ['132.224.71.10:16667','132.224.71.11:16667','132.224.71.12:16667','132.224.71.13:16667','132.224.71.14:16667']
+  topic_paas: 'paas-component-metric'
+  topic_e2e: 'paas-component-metric-e2e'
+  group: 'paasMetric'
 promql:
   instance_id: 
     label: 'instance'
     regex: '(.*):.*'
     replacement: '$1'
-    is_ip_port: false
+    is_ip_port: true
   querys:
-    - metric: 'cpu_system'
-      query: '(sum(rate(node_cpu_seconds_total{mode=~"system"}[5m])) by(instance) /sum(irate(node_cpu_seconds_total[5m])) by(instance))* 100'
-    - metric: 'cpu_user'
-      query: '(sum(rate(node_cpu_seconds_total{mode=~"user"}[5m])) by(instance) /sum(irate(node_cpu_seconds_total[5m])) by(instance))* 100'
-    - metric: 'cpu_idle'
-      query: '(sum(rate(node_cpu_seconds_total{mode=~"idle"}[5m])) by(instance) /sum(irate(node_cpu_seconds_total[5m])) by(instance))* 100'
-    - metric: 'cpu_iowait'
-      query: '(sum(rate(node_cpu_seconds_total{mode=~"iowait"}[5m])) by(instance) /sum(irate(node_cpu_seconds_total[5m])) by(instance))* 100'
-    - metric: 'mem_usage'
-      query: '((node_memory_MemTotal_bytes - (node_memory_MemAvailable_bytes or (node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes)))/node_memory_MemTotal_bytes)*100'
-    - metric: 'swap_usage'
-      query: '(node_memory_SwapCached_bytes/node_memory_SwapTotal_bytes) * 100'
-    - metric: 'load1'
-      query: 'node_load1'
-    - metric: 'load5'
-      query: 'node_load5'
-    - metric: 'load15'
-      query: 'node_load15'
-    - metric: 'procs_blocked'
-      query: 'node_procs_blocked'
-    - metric: 'procs_running'
-      query: 'node_procs_running'
-    - metric: 'netstat_Tcp_CurrEstab'
-      query: 'node_netstat_Tcp_CurrEstab'
-    - metric: 'netstat_InOctets_irate'
-      query: 'irate(node_netstat_IpExt_InOctets[5m])'
-    - metric: 'netstat_OutOctets_irate'
-      query: 'irate(node_netstat_IpExt_OutOctets[5m])'
-    - metric: 'disk_usage' 
-      query: '100-(sum by (instance,mountpoint)(node_filesystem_avail_bytes{fstype!~"rootfs|selinuxfs|autofs|rpc_pipefs|tmpfs|udev|none|devpts|sysfs|debugfs|fuse.*"}))/(sum by (instance,mountpoint) (node_filesystem_size_bytes{fstype!~"rootfs|selinuxfs|autofs|rpc_pipefs|tmpfs|udev|none|devpts|sysfs|debugfs|fuse.*"}))*100'
-      keep_labels: true
-    - metric: 'disk_read_iops' 
-      query: 'sum by (instance,device) (irate(node_disk_reads_completed_total[5m]) or irate(node_disk_reads_completed[5m]))'
-      keep_labels: true	
-    - metric: 'disk_write_iops' 
-      query: 'sum by (instance,device) (irate(node_disk_writes_completed_total[5m]) or irate(node_disk_writes_completed_total[5m]))'
-      keep_labels: true	
-    - metric: 'disk_read_bytes_irate' 
-      query: 'sum by (instance,device) (irate(node_disk_read_bytes_total[5m]))'
-      keep_labels: true	
-    - metric: 'disk_written_bytes_irate' 
-      query: 'sum by (instance,device) (irate(node_disk_written_bytes_total[5m]))'
-      keep_labels: true		
+    - metric: 'httpconnections'
+      query: 'sum by (instance,cluster)(nginx_http_connections)'
 add_fields:
   api_url: '' 

@@ -2,7 +2,7 @@ package prometheus
 
 import (
 	"context"
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -11,7 +11,6 @@ import (
 
 	"github.com/ailkyud/go-prometheus2kafka/add"
 	"github.com/ailkyud/go-prometheus2kafka/config"
-	"github.com/ailkyud/go-prometheus2kafka/es"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
@@ -57,9 +56,9 @@ func LoadMetrics() {
 	}
 	wg.Wait()
 	t1 := qt.Unix()
-	index := es.GetIndex(t1)
+	//	index := es.GetIndex(t1)
 	count := 0
-	bs := es.Client.NewBulkService()
+	//	bs := es.Client.NewBulkService()
 	for k, v := range nms.metrics {
 		vi := map[string]interface{}{}
 		for k2, v2 := range v {
@@ -89,18 +88,18 @@ func LoadMetrics() {
 		sTimeProcessed := qt.In(local1).Format("2006-01-02T15:04:05.000Z")
 		vi["@timestamp"] = sTimeProcessed
 
-		jsonBytes, err := json.Marshal(vi)
+		//jsonBytes, err := json.Marshal(vi)
 		if err != nil {
 			fmt.Printf("json marshal error, key=%s, value=%v \n", k, vi)
 		} else {
-			es.Client.AddBulkRequest(bs, index, string(jsonBytes))
+			//es.Client.AddBulkRequest(bs, index, string(jsonBytes))
 			count++
 		}
-		if count >= 2000 {
-			go es.Client.SubmitBulkRequest(bs)
-			bs = es.Client.NewBulkService()
-			count = 0
-		}
+		//if count >= 2000 {
+		//go es.Client.SubmitBulkRequest(bs)
+		//bs = es.Client.NewBulkService()
+		//count = 0
+		//}
 	}
 	now := time.Now()
 	local1, err := time.LoadLocation("Asia/Shanghai") //same as "UTC"
@@ -110,5 +109,6 @@ func LoadMetrics() {
 	sTimeProcessed := now.In(local1).Format("2006-01-02 15:04:05")
 	processedTime := now.Unix() - t1
 	fmt.Printf("submiting %d records of %d to es on %s (%d seconds used)\n", count, t1, sTimeProcessed, processedTime)
-	go es.Client.SubmitBulkRequest(bs)
+	//	go es.Client.SubmitBulkRequest(bs)
+
 }

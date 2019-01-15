@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var Config Node2EsConfig
+var Config Prometheus2kafkaConfig
 
 const (
 	ENCRYPT_KEY = "node2es_encryption_key"
@@ -18,7 +18,7 @@ type PromQuery struct {
 	Keep_labels bool
 }
 
-type Node2EsConfig struct {
+type Prometheus2kafkaConfig struct {
 	Listen_on  string
 	Prometheus struct {
 		Url string
@@ -39,6 +39,12 @@ type Node2EsConfig struct {
 	}
 	Add_fields struct {
 		Api_url string
+	}
+	Kafka struct {
+		Brokers   []string
+		TopicPaas string
+		TopicE2e  string
+		Group     string
 	}
 }
 
