@@ -41,10 +41,8 @@ type Prometheus2kafkaConfig struct {
 		Api_url string
 	}
 	Kafka struct {
-		Brokers   []string
-		TopicPaas string
-		TopicE2e  string
-		Group     string
+		Brokers                    []string
+		Topicpaas, Topice2e, Group string
 	}
 }
 

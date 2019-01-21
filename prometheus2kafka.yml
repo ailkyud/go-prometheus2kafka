@@ -1,22 +1,32 @@
 listen_on: ':19311'
 prometheus:
-  url: 'http://132.252.128.109:19090'
+  url: 'http://132.252.128.110:19090'
 es:
   urls: ['http://10.1.236.157:9200/']
   index: 'node-metrics-${+yyyy.MM}'
 kafka:
-  brokers: ['132.224.71.10:16667','132.224.71.11:16667','132.224.71.12:16667','132.224.71.13:16667','132.224.71.14:16667']
-  topic_paas: 'paas-component-metric'
-  topic_e2e: 'paas-component-metric-e2e'
+  brokers: ['127.0.0.1:9092' ]
+  topicpaas: 'testNJ'
+  topice2e: 'paas-component-metric-e2e'
   group: 'paasMetric'
 promql:
   instance_id: 
-    label: 'instance'
+    label: 'addr'
     regex: '(.*):.*'
     replacement: '$1'
     is_ip_port: true
   querys:
-    - metric: 'httpconnections'
-      query: 'sum by (instance,cluster)(nginx_http_connections)'
+    - metric: 'redis_up'
+      query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_up)'
+    - metric: 'redis_instance_info'
+      query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_instance_info)'
+    - metric: 'redis_connected_clients'
+      query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_connected_clients)'
+    - metric: 'redis_blocked_clients'
+      query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_blocked_clients)'
+    - metric: 'redis_commands_processed_total'
+      query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_commands_processed_total)'
+    - metric: 'redis_memory_used_bytes / redis_config_maxmemory'
+      query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_memory_used_bytes / redis_config_maxmemory)'
 add_fields:
   api_url: '' 

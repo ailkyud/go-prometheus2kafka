@@ -19,18 +19,11 @@ var (
 )
 
 func main() {
-	var (
-		configFile       = kingpin.Flag("config.file", "Configuration file").Default("prometheus2kafka.yml").String()
-		keyToBeEncrypted = kingpin.Flag("encrypting.key", "encrypting inputted key, and exist immediately").String()
-	)
+	var configFile = kingpin.Flag("config.file", "Configuration file").Default("D:/go_code/prometheus2kafka/go-prometheus2kafka/prometheus2kafka.yml").String()
+	var interval = kingpin.Flag("interval", "Interval time (Unit second)").Default("60").Int()
 	kingpin.HelpFlag.Short('h')
 	kingpin.Version(fmt.Sprintf("%s\n%s\n%s", VERSION, BUILD_TIME, GO_VERSION))
 	kingpin.Parse()
-
-	if *keyToBeEncrypted != "" {
-		fmt.Printf("Encrypted String\n%s\n", config.EncryptingString(*keyToBeEncrypted))
-		os.Exit(0)
-	}
 
 	err := config.LoadConfig(*configFile)
 	if err != nil {
@@ -38,6 +31,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	//刷新缓存
 	if config.Config.Add_fields.Api_url != "" {
 		addFieldsEndPoint := add.NewAddFields()
 		http.HandleFunc("/-/reload", func(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +43,8 @@ func main() {
 		})
 	}
 
-	c := time.Tick(time.Duration(60) * time.Second)
+	//处理指标
+	c := time.Tick(time.Duration(*interval) * time.Second)
 	go func() {
 		for {
 			prometheus.LoadMetrics()

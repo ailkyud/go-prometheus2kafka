@@ -23,6 +23,7 @@ require (
 	github.com/segmentio/kafka-go v0.2.2
 	github.com/wvanbergen/kafka v0.0.0-20171203153745-e2edea948ddf
 	github.com/wvanbergen/kazoo-go v0.0.0-20180202103751-f72d8611297a // indirect
+	gopkg.in/Shopify/sarama.v1 v1.20.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/olivere/elastic.v5 v5.0.76
 	gopkg.in/yaml.v2 v2.2.1
