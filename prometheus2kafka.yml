@@ -1,6 +1,8 @@
 listen_on: ':19311'
 prometheus:
   url: 'http://132.252.128.110:19090'
+  name: 'PS.REDIS'
+  comptype: '170201'
 es:
   urls: ['http://10.1.236.157:9200/']
   index: 'node-metrics-${+yyyy.MM}'
@@ -18,15 +20,25 @@ promql:
   querys:
     - metric: 'redis_up'
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_up)'
+      metriccode: '30202623260001'
+      metrictype: '1'
     - metric: 'redis_instance_info'
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_instance_info)'
+      metriccode: '30202623260003'
+      metrictype: '1'
     - metric: 'redis_connected_clients'
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_connected_clients)'
+      metriccode: '30202623260004'
+      metrictype: '1'
     - metric: 'redis_blocked_clients'
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_blocked_clients)'
+      metriccode: '30202623260005'
+      metrictype: '1'
     - metric: 'redis_commands_processed_total'
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_commands_processed_total)'
+      metriccode: '30202624260011'
+      metrictype: '2'
     - metric: 'redis_memory_used_bytes / redis_config_maxmemory'
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_memory_used_bytes / redis_config_maxmemory)'
-add_fields:
-  api_url: '' 
+      metriccode: '30202624260001'
+      metrictype: '2'

@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ailkyud/go-prometheus2kafka/add"
 	"github.com/ailkyud/go-prometheus2kafka/config"
 	"github.com/ailkyud/go-prometheus2kafka/kafka"
 	"github.com/prometheus/client_golang/api"
@@ -24,7 +23,8 @@ func LoadMetrics() {
 	if err != nil {
 		fmt.Printf("Error when trying to connect to Prometheus %s, err: %v \n", url, err)
 	}
-	var mq []string
+	var vMq []string
+	var vMqE2e []string
 	query_api := v1.NewAPI(client)
 	nms := NewNodeMetrics()
 	instance_label := config.Config.Promql.Instance_id.Label
@@ -43,7 +43,10 @@ func LoadMetrics() {
 				//fmt.Println(vr.Value)
 				//这里paas保留实例完整信息 ip:port
 				addr := string(vr.Metric[model.LabelName(instance_label)])
-				nms.Add(addr, prometheusQuery.Metric, vr.Metric, (float64)(vr.Value))
+				vAddFields := MetricWithLabel{}
+				vAddFields["METRICCODE"] = prometheusQuery.Metriccode
+				vAddFields["METRICTYPE"] = prometheusQuery.Metrictype
+				nms.Add(addr, prometheusQuery.Metric, (float64)(vr.Value), vr.Metric, vAddFields)
 
 			}
 		}
@@ -56,7 +59,7 @@ func LoadMetrics() {
 		go getMetric(ctx, q, startTime)
 	}
 	wg.Wait()
-
+	//构造送paas-es存储消息
 	t1 := startTime.Unix()
 	count := 0
 	for k, v := range nms.metrics {
@@ -64,19 +67,14 @@ func LoadMetrics() {
 		for k2, v2 := range v {
 			vi[k2] = v2
 		}
-		if config.Config.Add_fields.Api_url != "" {
-			afs := add.AddFieldsFromExternalApi.GetInstanceAddFields(k)
-			vi["addFields"] = afs
-		}
 
 		if config.Config.Promql.Instance_id.Is_ip_port {
 			vi["addr_ip"] = k[:strings.LastIndex(k, ":")]
 			vi["addr_port"] = k[strings.LastIndex(k, ":")+1:]
 		} else {
-			vi["instance_ip"] = k
-			vi["instance_port"] = ""
+			vi["addr_ip"] = k
+			vi["addr_port"] = ""
 		}
-		//vi["timestamp"] = t1
 
 		local1, err := time.LoadLocation("") //same as "UTC"
 		if err != nil {
@@ -89,8 +87,34 @@ func LoadMetrics() {
 		if err != nil {
 			fmt.Printf("json marshal error, key=%s, value=%v \n", k, vi)
 		} else {
-			mq = append(mq, string(jsonBytes))
+			vMq = append(vMq, string(jsonBytes))
 			count++
+		}
+
+	}
+	//构造送端到端消息
+	for k, v := range nms.metrics {
+		vi := MetricWithLabel{}
+		vi_sub := MetricWithLabel{}
+		for k2, v2 := range v {
+			vi_sub[k2] = v2
+		}
+		vi["message"] = vi_sub
+		local1, err := time.LoadLocation("") //same as "UTC"
+		if err != nil {
+			fmt.Println(err)
+		}
+		sTimeProcessed := startTime.In(local1).Format("20060102150405")
+		sTimeCollect := startTime.In(local1).Format("2006-01-02 15:04:05")
+		vi["timestamp"] = sTimeProcessed
+		vi["name"] = config.Config.Prometheus.Name
+
+		jsonBytes, err := json.Marshal(vi)
+		fmt.Println(string(jsonBytes))
+		if err != nil {
+			fmt.Printf("json marshal error, key=%s, value=%v \n", k, vi)
+		} else {
+			vMqE2e = append(vMqE2e, string(jsonBytes))
 		}
 
 	}
@@ -103,8 +127,8 @@ func LoadMetrics() {
 	processedTime := now.Unix() - t1
 	fmt.Printf("提交 %d 条记录至kafka 当前时间 %s (%d 秒 用时)\n", count, sTimeProcessed, processedTime)
 	//记录提交kafka送paas
-	go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topicpaas, mq)
+	go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topicpaas, vMq)
 	//记录提交kafka送端到端
-	//	 kafka.
+	go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topice2e, vMqE2e)
 
 }

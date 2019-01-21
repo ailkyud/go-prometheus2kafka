@@ -19,7 +19,7 @@ var (
 )
 
 func main() {
-	var configFile = kingpin.Flag("config.file", "Configuration file").Default("D:/go_code/prometheus2kafka/go-prometheus2kafka/prometheus2kafka.yml").String()
+	var configFile = kingpin.Flag("config.file", "Configuration file").Default("prometheus2kafka.yml").String()
 	var interval = kingpin.Flag("interval", "Interval time (Unit second)").Default("60").Int()
 	kingpin.HelpFlag.Short('h')
 	kingpin.Version(fmt.Sprintf("%s\n%s\n%s", VERSION, BUILD_TIME, GO_VERSION))

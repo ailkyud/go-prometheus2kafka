@@ -16,18 +16,14 @@ type PromQuery struct {
 	Metric      string
 	Query       string
 	Keep_labels bool
+	Metriccode  string
+	Metrictype  string
 }
 
 type Prometheus2kafkaConfig struct {
 	Listen_on  string
 	Prometheus struct {
-		Url string
-	}
-	Es struct {
-		Urls     []string
-		Username string
-		Password string
-		Index    string
+		Url, Name, Comptype string
 	}
 	Promql struct {
 		Instance_id struct {
