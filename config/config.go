@@ -23,7 +23,7 @@ type PromQuery struct {
 type Prometheus2kafkaConfig struct {
 	Listen_on  string
 	Prometheus struct {
-		Url, Name, Comptype string
+		Url, Name, Type, Comptype string
 	}
 	Promql struct {
 		Instance_id struct {

@@ -2,6 +2,7 @@ listen_on: ':19311'
 prometheus:
   url: 'http://132.252.128.110:19090'
   name: 'PS.REDIS'
+  type: 'redis'
   comptype: '170201'
 kafka:
   brokers: ['127.0.0.1:9092'  ]
@@ -35,7 +36,7 @@ promql:
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_commands_processed_total)'
       metriccode: '30202624260011'
       metrictype: '2'
-    - metric: 'redis_memory_used_bytes / redis_config_maxmemory'
+    - metric: 'redis_memory_used_ratio'
       query: 'sum by(instance,addr,cluster,cluster_id,cluster_type) (redis_memory_used_bytes / redis_config_maxmemory)'
       metriccode: '30202624260001'
       metrictype: '2'
