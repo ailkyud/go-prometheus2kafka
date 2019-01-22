@@ -148,6 +148,6 @@ func LoadMetrics() {
 	//记录提交kafka送端到端
 	go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topice2e, vMqE2e)
 	//记录提交kafka送paas
-	//go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topicpaas, vMq)
+	go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topicpaas, vMq)
 
 }
