@@ -3,13 +3,10 @@ prometheus:
   url: 'http://132.252.128.110:19090'
   name: 'PS.REDIS'
   comptype: '170201'
-es:
-  urls: ['http://10.1.236.157:9200/']
-  index: 'node-metrics-${+yyyy.MM}'
 kafka:
-  brokers: ['127.0.0.1:9092' ]
-  topicpaas: 'testNJ'
-  topice2e: 'paas-component-metric-e2e'
+  brokers: ['127.0.0.1:9092'  ]
+  topicpaas: 'paas-component-metric'
+  topice2e: 'testNJ'
   group: 'paasMetric'
 promql:
   instance_id: 

@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ailkyud/go-prometheus2kafka/add"
 	"github.com/ailkyud/go-prometheus2kafka/config"
 	"github.com/ailkyud/go-prometheus2kafka/prometheus"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -29,18 +28,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
-	}
-
-	//刷新缓存
-	if config.Config.Add_fields.Api_url != "" {
-		addFieldsEndPoint := add.NewAddFields()
-		http.HandleFunc("/-/reload", func(w http.ResponseWriter, r *http.Request) {
-			addFieldsEndPoint.SetReloadFlag()
-			w.Write([]byte(`{"acknowledged":"true"}`))
-		})
-		http.HandleFunc("/-/instancesMapping", func(w http.ResponseWriter, r *http.Request) {
-			w.Write(addFieldsEndPoint.GetInstancesMapping())
-		})
 	}
 
 	//处理指标

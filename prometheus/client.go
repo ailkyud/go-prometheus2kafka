@@ -23,8 +23,8 @@ func LoadMetrics() {
 	if err != nil {
 		fmt.Printf("Error when trying to connect to Prometheus %s, err: %v \n", url, err)
 	}
-	var vMq []string
-	var vMqE2e []string
+	vMq := []string{}
+	vMqE2e := []string{}
 	query_api := v1.NewAPI(client)
 	nms := NewNodeMetrics()
 	instance_label := config.Config.Promql.Instance_id.Label
@@ -76,59 +76,78 @@ func LoadMetrics() {
 			vi["addr_port"] = ""
 		}
 
-		local1, err := time.LoadLocation("") //same as "UTC"
 		if err != nil {
 			fmt.Println(err)
 		}
-		sTimeProcessed := startTime.In(local1).Format("2006-01-02T15:04:05.000Z")
+		sTimeProcessed := startTime.Format("2006-01-02T15:04:05.000Z")
 		vi["@timestamp"] = sTimeProcessed
 
+		vi["metrics"] = nms.metrics_with_labels[k]["metrics"]
 		jsonBytes, err := json.Marshal(vi)
 		if err != nil {
 			fmt.Printf("json marshal error, key=%s, value=%v \n", k, vi)
 		} else {
+			//fmt.Println(string(jsonBytes))
 			vMq = append(vMq, string(jsonBytes))
 			count++
 		}
 
 	}
 	//构造送端到端消息
-	for k, v := range nms.metrics {
+	for k, v := range nms.metrics_with_labels {
 		vi := MetricWithLabel{}
-		vi_sub := MetricWithLabel{}
-		for k2, v2 := range v {
-			vi_sub[k2] = v2
-		}
-		vi["message"] = vi_sub
-		local1, err := time.LoadLocation("") //same as "UTC"
+		vi_sub_arr := []MetricWithLabel{}
+
 		if err != nil {
 			fmt.Println(err)
 		}
-		sTimeProcessed := startTime.In(local1).Format("20060102150405")
-		sTimeCollect := startTime.In(local1).Format("2006-01-02 15:04:05")
+		sTimeProcessed := startTime.Format("20060102150405")
+		sTimeCollect := startTime.Format("2006-01-02 15:04:05")
+
 		vi["timestamp"] = sTimeProcessed
 		vi["name"] = config.Config.Prometheus.Name
 
+		for _, v2 := range v["metrics"] {
+			vi_sub := MetricWithLabel{}
+
+			for k3, v3 := range v2 {
+				if k3 == "METRICCODE" || k3 == "METRICTYPE" {
+					vi_sub[k3] = v3
+				}
+				if strings.Contains(k3, "metric@") {
+					vi_sub["METRICVALUE"] = v3
+				}
+			}
+
+			vi_sub["CompType"] = config.Config.Prometheus.Comptype
+			vi_sub["COLLECTTIME"] = sTimeCollect
+			vi_sub["HOSTIP"] = k[:strings.LastIndex(k, ":")]
+			vi_sub["CompKey"] = k[:strings.LastIndex(k, ":")] + "|redis_" + k[strings.LastIndex(k, ":")+1:]
+			vi_sub_arr = append(vi_sub_arr, vi_sub)
+		}
+
+		vi["message"] = vi_sub_arr
 		jsonBytes, err := json.Marshal(vi)
-		fmt.Println(string(jsonBytes))
 		if err != nil {
 			fmt.Printf("json marshal error, key=%s, value=%v \n", k, vi)
 		} else {
+			//fmt.Println(string(jsonBytes))
 			vMqE2e = append(vMqE2e, string(jsonBytes))
 		}
 
 	}
 	now := time.Now()
-	local1, err := time.LoadLocation("Asia/Shanghai") //same as "UTC"
 	if err != nil {
 		fmt.Println(err)
 	}
-	sTimeProcessed := now.In(local1).Format("2006-01-02 15:04:05")
 	processedTime := now.Unix() - t1
+	sTimeProcessed := startTime.Format("20060102150405")
+
 	fmt.Printf("提交 %d 条记录至kafka 当前时间 %s (%d 秒 用时)\n", count, sTimeProcessed, processedTime)
-	//记录提交kafka送paas
-	go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topicpaas, vMq)
+
 	//记录提交kafka送端到端
 	go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topice2e, vMqE2e)
+	//记录提交kafka送paas
+	//go kafka.AsyncProducer(config.Config.Kafka.Brokers, config.Config.Kafka.Topicpaas, vMq)
 
 }

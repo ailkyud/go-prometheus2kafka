@@ -31,7 +31,9 @@ func AsyncProducer(vBrokers []string, vTopic string, vMq []string) {
 	defer producer.AsyncClose()
 
 	var value string
+
 	for i := 0; i < len(vMq); i++ {
+		//fmt.Println(i)
 		value = vMq[i]
 		// 发送的消息,主题。
 		// 注意：这里的msg必须得是新构建的变量，不然你会发现发送过去的消息内容都是一样的，因为批次发送消息的关系。
@@ -41,16 +43,17 @@ func AsyncProducer(vBrokers []string, vTopic string, vMq []string) {
 
 		//将字符串转化为字节数组
 		msg.Value = sarama.ByteEncoder(value)
+
 		//fmt.Println(value)
 
 		//使用通道发送
 		producer.Input() <- msg
 
-		select {
-		//case suc := <-producer.Successes():
-		//fmt.Printf("offset: %d,  timestamp: %s", suc.Offset, suc.Timestamp.String())
-		case fail := <-producer.Errors():
-			fmt.Printf("err: %s\n", fail.Err.Error())
-		}
+		// select {
+		// //case suc := <-producer.Successes():
+		// //fmt.Printf("offset: %d,  timestamp: %s", suc.Offset, suc.Timestamp.String())
+		// case fail := <-producer.Errors():
+		// 	fmt.Printf("err: %s\n", fail.Err.Error())
+		// }
 	}
 }
