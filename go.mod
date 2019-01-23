@@ -5,7 +5,6 @@ require (
 	github.com/Shopify/sarama v1.20.1
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
-	github.com/confluentinc/confluent-kafka-go v0.11.6
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eapache/go-resiliency v1.1.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
@@ -19,12 +18,7 @@ require (
 	github.com/prometheus/client_golang v0.9.0
 	github.com/prometheus/common v0.0.0-20181020173914-7e9e6cabbd39
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
-	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
-	github.com/segmentio/kafka-go v0.2.2
-	github.com/wvanbergen/kafka v0.0.0-20171203153745-e2edea948ddf
-	github.com/wvanbergen/kazoo-go v0.0.0-20180202103751-f72d8611297a // indirect
 	gopkg.in/Shopify/sarama.v1 v1.20.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
-	gopkg.in/olivere/elastic.v5 v5.0.76
 	gopkg.in/yaml.v2 v2.2.1
 )
