@@ -6,36 +6,38 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-//指标的数据结构
-type InstanceInfo struct {
+//metric中一个dataPoint的数据结构
+type DataPoint struct {
 	//存实例地址,唯一标识
 	addr string
 	//存prometheus标签
-	labels map[string]interface{}
+	tags map[string]interface{}
 	//存标签扩展
-	labels_extent map[string]interface{}
-	//存prometheus指标值
-	metrics map[string]interface{}
-	//存指标值扩展,这里key存对应指标名,value存map
-	metrics_extent map[string]map[string]interface{}
+	tags_extent map[string]interface{}
+	//存prometheus度量域
+	metricField map[string]interface{}
+	//存度量域扩展,这里key存对应度量名,value存map
+	metricField_extent map[string]map[string]interface{}
 }
 
-type InstanceInfoArray struct {
+//metric数据
+type DataPointArray struct {
 	sync.RWMutex
-	arrInstanceInfo []InstanceInfo
+	arrDataPoint []DataPoint
 }
 
-func NewInstanceInfoArray() *InstanceInfoArray {
-	return &InstanceInfoArray{arrInstanceInfo: []InstanceInfo{}}
+//初始化一个metric数据
+func NewDataPointArray() *DataPointArray {
+	return &DataPointArray{arrDataPoint: []DataPoint{}}
 }
 
 //NodeMetrics 赋值metrics方法
-func (instanceInfoArray *InstanceInfoArray) Add(addr, metricName string, metricVal float64, labels model.Metric, metricsExtent map[string]interface{}) {
-	instanceInfoArray.Lock()
-	defer instanceInfoArray.Unlock()
+func (dataPointArray *DataPointArray) Add(addr, metricFieldName string, metricFieldVal float64, tags model.Metric, metricFieldExtent map[string]interface{}) {
+	dataPointArray.Lock()
+	defer dataPointArray.Unlock()
 	//判定是否已存在
 	vIndexKey := -1
-	for num, vi := range instanceInfoArray.arrInstanceInfo {
+	for num, vi := range dataPointArray.arrDataPoint {
 		if vi.addr == addr {
 			vIndexKey = num
 			break
@@ -43,33 +45,33 @@ func (instanceInfoArray *InstanceInfoArray) Add(addr, metricName string, metricV
 	}
 	if vIndexKey > -1 {
 		//存在直接赋值或覆盖
-		vi := instanceInfoArray.arrInstanceInfo[vIndexKey]
+		vi := dataPointArray.arrDataPoint[vIndexKey]
 		//插入指标值
-		vi.metrics[metricName] = metricVal
+		vi.metricField[metricFieldName] = metricFieldVal
 		//插入标签
-		for k, v := range labels {
-			vi.labels[string(k)] = v
+		for k, v := range tags {
+			vi.tags[string(k)] = v
 		}
 		//插入指标值的扩展信息
-		vi.metrics_extent[metricName] = map[string]interface{}{}
-		for k, v := range metricsExtent {
-			vi.metrics_extent[metricName][k] = v
+		vi.metricField_extent[metricFieldName] = map[string]interface{}{}
+		for k, v := range metricFieldExtent {
+			vi.metricField_extent[metricFieldName][k] = v
 		}
 
 	} else {
 		//不存在新增InstanceInfo并插入InstanceInfoArray
-		sInstanceInfo := InstanceInfo{}
-		sInstanceInfo.addr = addr
-		sInstanceInfo.labels = map[string]interface{}{}
-		sInstanceInfo.labels_extent = map[string]interface{}{}
-		sInstanceInfo.metrics = map[string]interface{}{}
-		sInstanceInfo.metrics_extent = map[string]map[string]interface{}{}
-		for k, v := range labels {
-			sInstanceInfo.labels[string(k)] = v
+		dataPoint := DataPoint{}
+		dataPoint.addr = addr
+		dataPoint.tags = map[string]interface{}{}
+		dataPoint.tags_extent = map[string]interface{}{}
+		dataPoint.metricField = map[string]interface{}{}
+		dataPoint.metricField_extent = map[string]map[string]interface{}{}
+		for k, v := range tags {
+			dataPoint.tags[string(k)] = v
 		}
-		sInstanceInfo.metrics[metricName] = metricVal
-		sInstanceInfo.metrics_extent[metricName] = metricsExtent
-		instanceInfoArray.arrInstanceInfo = append(instanceInfoArray.arrInstanceInfo, sInstanceInfo)
+		dataPoint.metricField[metricFieldName] = metricFieldVal
+		dataPoint.metricField_extent[metricFieldName] = metricFieldExtent
+		dataPointArray.arrDataPoint = append(dataPointArray.arrDataPoint, dataPoint)
 	}
 
 }

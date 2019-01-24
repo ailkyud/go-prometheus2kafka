@@ -31,7 +31,7 @@ func LoadMetrics() {
 	//送端到端的消息
 	vMqE2e := []string{}
 	//创建一个存放指标数据的对象
-	instanceInfoArray := NewInstanceInfoArray()
+	dataPointArray := NewDataPointArray()
 	//确定实例对应Prometheus的哪个标签
 	instance_label := config.Config.Promql.Instance_id.Label
 	var wg = sync.WaitGroup{}
@@ -50,10 +50,10 @@ func LoadMetrics() {
 				//取实例地址 ip:port
 				addr := string(vr.Metric[model.LabelName(instance_label)])
 				//送集团的扩展值，从配置文件中读取，这里暂时写死了，有变化需要调整代码
-				metricsExtent := map[string]interface{}{}
-				metricsExtent["METRICCODE"] = prometheusQuery.Metriccode
-				metricsExtent["METRICTYPE"] = prometheusQuery.Metrictype
-				instanceInfoArray.Add(addr, prometheusQuery.Metric, (float64)(vr.Value), vr.Metric, metricsExtent)
+				metricFieldExtent := map[string]interface{}{}
+				metricFieldExtent["METRICCODE"] = prometheusQuery.Metriccode
+				metricFieldExtent["METRICTYPE"] = prometheusQuery.Metrictype
+				dataPointArray.Add(addr, prometheusQuery.Metric, (float64)(vr.Value), vr.Metric, metricFieldExtent)
 
 			}
 		}
@@ -69,28 +69,28 @@ func LoadMetrics() {
 	//构造送paas-es存储消息
 	t1 := startTime.Unix()
 	count := 0
-	for _, instanceInfo := range instanceInfoArray.arrInstanceInfo {
+	for _, dataPoint := range dataPointArray.arrDataPoint {
 		//构造一个指标消息对象
 		vi := map[string]interface{}{}
 
-		for k, v := range instanceInfo.labels {
+		for k, v := range dataPoint.tags {
 			vi[k] = v
 		}
-		for k, v := range instanceInfo.labels_extent {
+		for k, v := range dataPoint.tags {
 			vi[k] = v
 		}
 
 		if config.Config.Promql.Instance_id.Is_ip_port {
-			vi["addr_ip"] = instanceInfo.addr[:strings.LastIndex(instanceInfo.addr, ":")]
-			vi["addr_port"] = instanceInfo.addr[strings.LastIndex(instanceInfo.addr, ":")+1:]
+			vi["addr_ip"] = dataPoint.addr[:strings.LastIndex(dataPoint.addr, ":")]
+			vi["addr_port"] = dataPoint.addr[strings.LastIndex(dataPoint.addr, ":")+1:]
 		} else {
-			vi["addr_ip"] = instanceInfo.addr
+			vi["addr_ip"] = dataPoint.addr
 		}
 
 		sTimeProcessed := startTime.Format("2006-01-02T15:04:05.000Z")
 		vi["@timestamp"] = sTimeProcessed
 
-		vi["metrics"] = instanceInfo.metrics
+		vi["metrics"] = dataPoint.metricField
 		jsonBytes, err := json.Marshal(vi)
 		if err != nil {
 			fmt.Printf("json marshal error,   value=%v \n", vi)
@@ -103,7 +103,7 @@ func LoadMetrics() {
 	}
 
 	//构造送端到端消息
-	for _, instanceInfo := range instanceInfoArray.arrInstanceInfo {
+	for _, dataPoint := range dataPointArray.arrDataPoint {
 		//构造一个指标消息对象
 		vi := map[string]interface{}{}
 		vi_sub_arr := []map[string]interface{}{}
@@ -114,10 +114,10 @@ func LoadMetrics() {
 		vi["timestamp"] = sTimeProcessed
 		vi["name"] = config.Config.Prometheus.Name
 
-		for k1, v1 := range instanceInfo.metrics {
+		for k1, v1 := range dataPoint.metricField {
 			vi_sub := map[string]interface{}{}
 			isSendE2e := false
-			for k2, v2 := range instanceInfo.metrics_extent[k1] {
+			for k2, v2 := range dataPoint.metricField_extent[k1] {
 				if k2 == "METRICCODE" || k2 == "METRICTYPE" {
 					isSendE2e = true
 					vi_sub[k2] = v2
@@ -130,8 +130,8 @@ func LoadMetrics() {
 			vi_sub["METRICVALUE"] = v1
 			vi_sub["CompType"] = config.Config.Prometheus.Comptype
 			vi_sub["COLLECTTIME"] = sTimeCollect
-			vi_sub["HOSTIP"] = instanceInfo.addr[:strings.LastIndex(instanceInfo.addr, ":")]
-			vi_sub["CompKey"] = instanceInfo.addr[:strings.LastIndex(instanceInfo.addr, ":")] + "|" + config.Config.Prometheus.Type + "_" + instanceInfo.addr[strings.LastIndex(instanceInfo.addr, ":")+1:]
+			vi_sub["HOSTIP"] = dataPoint.addr[:strings.LastIndex(dataPoint.addr, ":")]
+			vi_sub["CompKey"] = dataPoint.addr[:strings.LastIndex(dataPoint.addr, ":")] + "|" + config.Config.Prometheus.Type + "_" + dataPoint.addr[strings.LastIndex(dataPoint.addr, ":")+1:]
 			vi_sub_arr = append(vi_sub_arr, vi_sub)
 		}
 
