@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ailkyud/go-prometheus2kafka/config"
+
 	"github.com/ailkyud/go-prometheus2kafka/prometheus"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
